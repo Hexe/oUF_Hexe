@@ -1,0 +1,9 @@
+## Interface: 30300
+## Author: Hexe
+## Version: 30300.1
+## Title: oUF_Hexe
+## Notes: Just another oUF layout
+## RequiredDeps: oUF
+
+HexeTags.lua
+Hexe.lua
