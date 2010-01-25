@@ -1,0 +1,25 @@
+To Do:
+
+raid icons
+info icons -- leader, assistant, m.looter, lfdroles, status
+auras
+castbars
+combo points
+range visibility
+runebar
+threat
+vehicles
+
+plugin support for:
+	smooth
+	spellrange
+	healcomm4
+	experience
+	totembar
+	combat feedback
+	gcd
+	reputation
+	readycheck
+	threatfeedback
+	debuffhighlight
+	
