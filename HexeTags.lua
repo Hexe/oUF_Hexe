@@ -1,3 +1,4 @@
+
 local function hex(r, g, b)
 if r == nil then ChatFrame1:AddMessage("check one nil") end
 	if(type(r) == 'table') then
@@ -5,6 +6,16 @@ if r == nil then ChatFrame1:AddMessage("check one nil") end
 	end
 	if r == nil then ChatFrame1:AddMessage("check two nil") end
 	return ('|cff%02x%02x%02x'):format(r * 255, g * 255, b * 255)
+end
+
+local function shortVal(value)
+	if(value >= 1e6) then
+		return ('%.2fm'):format(value / 1e6):gsub('%.?0+([km])$', '%1')
+	elseif(value >= 1e4) then
+		return ('%.1fk'):format(value / 1e3):gsub('%.?0+([km])$', '%1')
+	else
+		return value
+	end
 end
 
 oUF.Tags['[g.name]'] = function(unit)
@@ -28,17 +39,6 @@ oUF.Tags['[g.petname]'] = function(unit)
 end
 oUF.TagEvents["[g.petname]"] = "UNIT_HAPPINESS UNIT_PET"
 
-oUF.Tags["[g.perhp]"] = function(unit)
-local m = UnitHealthMax(unit)
-	if (UnitAffectingCombat(unit)) then
-		return m == 0 and 0 or math.floor(UnitHealth(unit)/m*100+0.5).."%"
-	else
-		return
-	end
-end
-
-oUF.TagEvents['[g.perhp]'] = "UNIT_HEALTH"
-
 oUF.Tags["[g.misshp]"] = function(unit) 
   local max, min = UnitHealthMax(unit), UnitHealth(unit)
   local v = max-min
@@ -59,35 +59,34 @@ oUF.Tags["[g.misshp]"] = function(unit)
   return string
 end
 oUF.TagEvents["[g.misshp]"] = "UNIT_HEALTH"
-  
-oUF.Tags["[g.abshp]"] = function(unit) 
-  local v = UnitHealth(unit)
-  local string = ""
-  if UnitIsDeadOrGhost(unit) == 1 then
-    string = "RiP"
-  elseif UnitIsConnected(unit) == nil then
-    string = "D/C"
-  elseif v > 1e6 then
-    string = (floor((v/1e6)*10)/10).."m"
-  elseif v > 1e3 then
-    string = (floor((v/1e3)*10)/10).."k"
-  else
-    string = v
-  end  
-  return string
+ 
+oUF.Tags["[g.abshp]"] = function(unit)
+	local min, max = UnitHealth(unit), UnitHealthMax(unit)
+	
+	local status = not UnitIsConnected(unit) and 'D/C' or UnitIsGhost(unit) and 'BOO' or UnitIsDead(unit) and 'RIP'
+	
+	local target = unit == 'target' and UnitCanAttack('player', unit) and ('%s  %d|cffA3E496%%|r'):format(min, min / max * 100)
+	
+	local player = unit == 'player' and min ~= max and ('|cffff8080%d|r %d|cff0090ff%%|r'):format(min - max, min / max * 100)
+	
+	return status and status or target and target or player and player or min ~= max and ('%s |cff0090ff/|r %s'):format(shortVal(min), shortVal(max)) or max
 end
 oUF.TagEvents["[g.abshp]"] = "UNIT_HEALTH"
  
 oUF.Tags["[g.absmp]"] = function(unit) 
-  local v = UnitMana(unit)
-  local string = ""
-  if v > 1e6 then
-    string = (floor((v/1e6)*10)/10).."m"
-  elseif v > 1e3 then
-    string = (floor((v/1e3)*10)/10).."k"
-  else
-    string = v
-  end  
+--	if (UnitMana(unit) <= 0) then
+  	local v = UnitMana(unit)
+  	local string = ""
+  	if v > 1e6 then
+    	string = (floor((v/1e6)*10)/10).."m"
+  	elseif v > 1e3 then
+    	string = (floor((v/1e3)*10)/10).."k"
+  	else
+    	string = v
+  	end
+ -- else
+ -- 	string = ""
+ -- end  
   return string
 end
 oUF.TagEvents["[g.absmp]"] = "UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_RUNIC_POWER"
@@ -142,3 +141,13 @@ oUF.Tags["[g.classtext]"] = function(unit)
   return string
 end
   
+oUF.Tags['[phealth]'] = function(unit)
+	local min, max = UnitHealth(unit), UnitHealthMax(unit)
+	
+	local status = not UnitIsConnected(unit) and 'Offline' or UnitIsGhost(unit) and 'Ghost' or UnitIsDead(unit) and 'Dead'
+	local target = unit == 'target' and UnitCanAttack('player', unit) and ('%s (%d|cff0090ff%%|r)'):format(shortVal(min), min / max * 100)
+	local player = unit == 'player' and min ~= max and ('|cffff8080%d|r %d|cff0090ff%%|r'):format(min - max, min / max * 100)
+	
+	return status and status or target and target or player and player or min ~= max and ('%s |cff0090ff/|r %s'):format(shortVal(min), shortVal(max)) or max
+end
+
